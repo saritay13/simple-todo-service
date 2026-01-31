@@ -24,6 +24,8 @@ public class TodoItem {
 
     private Instant doneAt;
 
+    private Instant createAt;
+
     protected TodoItem(){
         //JPA only
     }
@@ -33,6 +35,7 @@ public class TodoItem {
         this.description = description;
         this.status = TodoStatus.NOT_DONE;
         this.dueAt = dueAt;
+        this.createAt = Instant.now();
         this.doneAt = null;
     }
 
@@ -56,6 +59,10 @@ public class TodoItem {
         this.doneAt = doneAt;
     }
 
+    public void setCreateAt(Instant createAt) {
+        this.createAt = createAt;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -74,5 +81,9 @@ public class TodoItem {
 
     public Instant getDoneAt() {
         return doneAt;
+    }
+
+    public Instant getCreateAt() {
+        return createAt;
     }
 }
