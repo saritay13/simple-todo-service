@@ -1,4 +1,4 @@
-package com.example.todos.simple_todo_service;
+package com.example.todos.simpletodoservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
