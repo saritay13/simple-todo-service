@@ -2,7 +2,6 @@ package com.example.todos.simpletodoservice.mapper;
 
 import com.example.todos.simpletodoservice.domain.TodoItem;
 import com.example.todos.simpletodoservice.dto.TodoResponse;
-import com.example.todos.simpletodoservice.service.TodoService;
 
 public class TodoMapper {
 
@@ -12,7 +11,7 @@ public class TodoMapper {
         return new TodoResponse(item.getId(),
                 item.getDescription(),
                 item.getStatus(),
-                item.getCreateAt(),
+                item.getCreatedAt(),
                 item.getDueAt(),
                 item.getDoneAt());
     }

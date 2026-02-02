@@ -24,18 +24,17 @@ public class TodoItem {
 
     private Instant doneAt;
 
-    private Instant createAt;
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
     protected TodoItem(){
         //JPA only
     }
 
     public TodoItem(String description, Instant dueAt) {
-        this.id = id;
         this.description = description;
         this.status = TodoStatus.NOT_DONE;
         this.dueAt = dueAt;
-        this.createAt = Instant.now();
         this.doneAt = null;
     }
 
@@ -59,8 +58,8 @@ public class TodoItem {
         this.doneAt = doneAt;
     }
 
-    public void setCreateAt(Instant createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
@@ -83,7 +82,13 @@ public class TodoItem {
         return doneAt;
     }
 
-    public Instant getCreateAt() {
-        return createAt;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
+
+    @PrePersist
+    void onCreate() {
+        this.createdAt = Instant.now();
+    }
+
 }

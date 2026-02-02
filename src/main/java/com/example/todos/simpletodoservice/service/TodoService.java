@@ -12,8 +12,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static com.example.todos.simpletodoservice.constants.ErrorMessages.*;
+
 @Service
 public class TodoService {
+
 
     private final TodoItemRepository repository;
 
@@ -24,11 +27,11 @@ public class TodoService {
     @Transactional
     public TodoItem create(String description, Instant dueAt){
         if(description == null || description.isBlank()){
-            throw new IllegalArgumentException("description must not be blank");
+            throw new IllegalArgumentException(DESCRIPTION_MUST_NOT_BE_BLANK);
         }
 
         if(dueAt == null){
-            throw new IllegalArgumentException("dueAt must not be null");
+            throw new IllegalArgumentException(DUE_AT_MUST_NOT_BE_NULL);
         }
 
         TodoItem item = new TodoItem(description, dueAt);
@@ -39,7 +42,7 @@ public class TodoService {
     public TodoItem updateDescription(UUID id, String newDescription){
 
         if(newDescription == null || newDescription.isBlank()){
-            throw new IllegalArgumentException("description must not be blank");
+            throw new IllegalArgumentException(DESCRIPTION_MUST_NOT_BE_BLANK1);
         }
 
         TodoItem item = getRefreshedStatus(id);
@@ -69,7 +72,7 @@ public class TodoService {
     @Transactional
     public TodoItem getById(UUID id) {
         TodoItem item = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Todo item not found: " + id));
+                .orElseThrow(() -> new NotFoundException(TODO_ITEM_NOT_FOUND + id));
 
         // "Read-time" refresh: update computed status
         return refreshStatusIfNeeded(item);
@@ -95,7 +98,7 @@ public class TodoService {
 
     private TodoItem getRefreshedStatus(UUID id){
         TodoItem item = repository.findById(id)
-                .orElseThrow(()-> new NotFoundException("todo item not found: "+ id));
+                .orElseThrow(()-> new NotFoundException(TODO_ITEM_NOT_FOUND + id));
 
         return refreshStatusIfNeeded(item);
     }
@@ -111,6 +114,6 @@ public class TodoService {
 
     private void ensureNotPastDue(TodoItem item){
         if(item.getStatus() == TodoStatus.PAST_DUE)
-            throw new PastDueModificationException("past due items cannot be modified");
+            throw new PastDueModificationException(PAST_DUE_ITEMS_CANNOT_BE_MODIFIED);
     }
 }
