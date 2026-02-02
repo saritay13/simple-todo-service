@@ -42,7 +42,7 @@ public class TodoService {
     public TodoItem updateDescription(UUID id, String newDescription){
 
         if(newDescription == null || newDescription.isBlank()){
-            throw new IllegalArgumentException(DESCRIPTION_MUST_NOT_BE_BLANK1);
+            throw new IllegalArgumentException(DESCRIPTION_MUST_NOT_BE_BLANK);
         }
 
         TodoItem item = getRefreshedStatus(id);
