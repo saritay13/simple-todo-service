@@ -12,6 +12,7 @@ public class TodoMapper {
                 item.getDescription(),
                 item.getStatus(),
                 item.getCreatedAt(),
+                item.getUpdatedAt(),
                 item.getDueAt(),
                 item.getDoneAt());
     }

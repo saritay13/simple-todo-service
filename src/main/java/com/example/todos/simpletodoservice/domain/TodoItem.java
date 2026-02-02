@@ -27,6 +27,9 @@ public class TodoItem {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(updatable = true)
+    private Instant updatedAt;
+
     protected TodoItem(){
         //JPA only
     }
@@ -62,6 +65,10 @@ public class TodoItem {
         this.createdAt = createdAt;
     }
 
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -86,9 +93,17 @@ public class TodoItem {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();
     }
 
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 }
