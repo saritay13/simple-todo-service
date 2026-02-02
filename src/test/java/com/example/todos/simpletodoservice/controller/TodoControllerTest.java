@@ -5,6 +5,7 @@ import com.example.todos.simpletodoservice.repository.TodoItemRepository;
 
 
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,12 +30,20 @@ public class TodoControllerTest {
     public static final String $_STATUS = "$.status";
     public static final String $_CREATED_AT = "$.createdAt";
     public static final String $_DUE_AT = "$.dueAt";
+    public static final String $_UPDATED_AT = "$.updatedAt";
+    public static final String $_PATH = "$.path";
+    public static final String $_MESSAGE = "$.message";
+    public static final String $_DONE_AT = "$.doneAt";
+    public static final String $ = "$";
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private TodoItemRepository repository;
 
+
+    @BeforeEach
     void cleanDB(){
         repository.deleteAll();
     }
@@ -64,7 +73,7 @@ public class TodoControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath($_STATUS).value(400))
-                .andExpect(jsonPath("$.path").value("/todos"));
+                .andExpect(jsonPath($_PATH).value("/todos"));
     }
 
     @Test
@@ -72,7 +81,7 @@ public class TodoControllerTest {
         String id = "00000000-0000-0000-0000-000000000000";
         mockMvc.perform(get("/todos/" + id))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(TODO_ITEM_NOT_FOUND + id));
+                .andExpect(jsonPath($_MESSAGE).value(TODO_ITEM_NOT_FOUND + id));
     }
 
     @Test
@@ -102,13 +111,15 @@ public class TodoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($_ID).value(id))
                 .andExpect(jsonPath($_STATUS).value("DONE"))
-                .andExpect(jsonPath("$.doneAt").exists());
+                .andExpect(jsonPath($_DONE_AT).exists())
+                .andExpect(jsonPath($_UPDATED_AT).exists());
 
         // mark not-done
         mockMvc.perform(put("/todos/{id}/not-done", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($_ID).value(id))
-                .andExpect(jsonPath($_STATUS).value("NOT_DONE"));
+                .andExpect(jsonPath($_STATUS).value("NOT_DONE"))
+                .andExpect(jsonPath($_UPDATED_AT).exists());
     }
 
     @Test
@@ -124,6 +135,7 @@ public class TodoControllerTest {
                 .andExpect(jsonPath($_DUE_AT).exists());
     }
 
+
     @Test
     void getAll_defaultShouldReturnOnlyNotDone_andIncludeDoneShouldReturnAll() throws Exception {
         String id1 = createTodoAndReturnId("Task A", Instant.now().plusSeconds(120));
@@ -137,14 +149,14 @@ public class TodoControllerTest {
         // default list: includeDone=false -> should return only NOT_DONE items
         mockMvc.perform(get("/todos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath($, hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(id2))
                 .andExpect(jsonPath("$[0].status").value("NOT_DONE"));
 
         // include done: should return both items
         mockMvc.perform(get("/todos").param("includeDone", "true"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath($, hasSize(2)));
     }
 
 
