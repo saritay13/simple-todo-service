@@ -35,6 +35,11 @@ public class TodoControllerTest {
     public static final String $_MESSAGE = "$.message";
     public static final String $_DONE_AT = "$.doneAt";
     public static final String $ = "$";
+    public static final String ROOT_URL = "/api/v1/todos";
+    public static final String NOT_DONE = "NOT_DONE";
+    public static final String DESCRIPTION_BUY_MILK = "Buy milk";
+    public static final String DESCRIPTION_BUY_GROCERY = "Buy Grocery";
+    public static final String DONE = "DONE";
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,16 +56,16 @@ public class TodoControllerTest {
 
     @Test
     void create_shouldReturn200_andPersistTodo_whenValidRequest() throws Exception {
-        String body = createRequestJson("Buy milk", Instant.now().plusSeconds(120).toString());
+        String body = createRequestJson(DESCRIPTION_BUY_MILK, Instant.now().plusSeconds(120).toString());
 
-        mockMvc.perform(post("/todos").
+        mockMvc.perform(post(ROOT_URL).
                 contentType(MediaType.APPLICATION_JSON).
                 content(body)).andExpect(status().isOk()).
                 andExpect(jsonPath($_ID).exists()).
-                andExpect(jsonPath($_DESCRIPTION).value("Buy milk")).
+                andExpect(jsonPath($_DESCRIPTION).value(DESCRIPTION_BUY_MILK)).
                 andExpect(jsonPath($_DUE_AT).exists()).
                 andExpect(jsonPath($_CREATED_AT).exists()).
-                andExpect(jsonPath($_STATUS).value("NOT_DONE"));
+                andExpect(jsonPath($_STATUS).value(NOT_DONE));
     }
 
 
@@ -68,18 +73,18 @@ public class TodoControllerTest {
     void create_shouldReturn400_whenDueAtIsInPast() throws Exception {
         String body = createRequestJson("Old task", "2000-01-01T10:00:00Z");
 
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post(ROOT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath($_STATUS).value(400))
-                .andExpect(jsonPath($_PATH).value("/todos"));
+                .andExpect(jsonPath($_PATH).value(ROOT_URL));
     }
 
     @Test
     void getById_shouldReturn404_whenTodoDoesNotExist() throws Exception {
         String id = "00000000-0000-0000-0000-000000000000";
-        mockMvc.perform(get("/todos/" + id))
+        mockMvc.perform(get(ROOT_URL+"/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath($_MESSAGE).value(TODO_ITEM_NOT_FOUND + id));
     }
@@ -95,7 +100,7 @@ public class TodoControllerTest {
                     { "description" : "fail"}
                 """;
 
-        mockMvc.perform(put("/todos/" + item.getId() + "/description")
+        mockMvc.perform(put(ROOT_URL+"/" + item.getId() + "/description")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isConflict());
@@ -107,30 +112,30 @@ public class TodoControllerTest {
         String id = createTodoAndReturnId("Do assignment", Instant.now().plusSeconds(120));
 
         // mark done
-        mockMvc.perform(put("/todos/{id}/done", id))
+        mockMvc.perform(put(ROOT_URL+"/{id}/done", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($_ID).value(id))
-                .andExpect(jsonPath($_STATUS).value("DONE"))
+                .andExpect(jsonPath($_STATUS).value(DONE))
                 .andExpect(jsonPath($_DONE_AT).exists())
                 .andExpect(jsonPath($_UPDATED_AT).exists());
 
         // mark not-done
-        mockMvc.perform(put("/todos/{id}/not-done", id))
+        mockMvc.perform(put(ROOT_URL+"/{id}/not-done", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($_ID).value(id))
-                .andExpect(jsonPath($_STATUS).value("NOT_DONE"))
+                .andExpect(jsonPath($_STATUS).value(NOT_DONE))
                 .andExpect(jsonPath($_UPDATED_AT).exists());
     }
 
     @Test
     void getById_shouldReturnCreatedTodo() throws Exception {
-        String id = createTodoAndReturnId("Buy milk", Instant.now().plusSeconds(120));
+        String id = createTodoAndReturnId(DESCRIPTION_BUY_MILK, Instant.now().plusSeconds(120));
 
-        mockMvc.perform(get("/todos/{id}", id))
+        mockMvc.perform(get(ROOT_URL+"/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($_ID).value(id))
-                .andExpect(jsonPath($_DESCRIPTION).value("Buy milk"))
-                .andExpect(jsonPath($_STATUS).value("NOT_DONE"))
+                .andExpect(jsonPath($_DESCRIPTION).value(DESCRIPTION_BUY_MILK))
+                .andExpect(jsonPath($_STATUS).value(NOT_DONE))
                 .andExpect(jsonPath($_CREATED_AT).exists())
                 .andExpect(jsonPath($_DUE_AT).exists());
     }
@@ -138,23 +143,23 @@ public class TodoControllerTest {
 
     @Test
     void getAll_defaultShouldReturnOnlyNotDone_andIncludeDoneShouldReturnAll() throws Exception {
-        String id1 = createTodoAndReturnId("Task A", Instant.now().plusSeconds(120));
-        String id2 = createTodoAndReturnId("Task B", Instant.now().plusSeconds(180));
+        String id1 = createTodoAndReturnId(DESCRIPTION_BUY_MILK, Instant.now().plusSeconds(120));
+        String id2 = createTodoAndReturnId(DESCRIPTION_BUY_GROCERY, Instant.now().plusSeconds(180));
 
         // mark one as DONE
-        mockMvc.perform(put("/todos/{id}/done", id1))
+        mockMvc.perform(put(ROOT_URL+"/{id}/done", id1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath($_STATUS).value("DONE"));
+                .andExpect(jsonPath($_STATUS).value(DONE));
 
         // default list: includeDone=false -> should return only NOT_DONE items
-        mockMvc.perform(get("/todos"))
+        mockMvc.perform(get(ROOT_URL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($, hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(id2))
-                .andExpect(jsonPath("$[0].status").value("NOT_DONE"));
+                .andExpect(jsonPath("$[0].status").value(NOT_DONE));
 
         // include done: should return both items
-        mockMvc.perform(get("/todos").param("includeDone", "true"))
+        mockMvc.perform(get(ROOT_URL).param("includeDone", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath($, hasSize(2)));
     }
@@ -166,7 +171,7 @@ public class TodoControllerTest {
 
         String body = createRequestJson(description, dueAt.toString());
 
-        String responseJson = mockMvc.perform(post("/todos")
+        String responseJson = mockMvc.perform(post(ROOT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())   // change to isCreated() if you return 201 later

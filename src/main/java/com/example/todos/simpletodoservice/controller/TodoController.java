@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/todos")
+@RequestMapping("/api/v1/todos")
 @Tag(name = "Todos", description = "Manage to-do items")
 public class TodoController {
 
