@@ -5,6 +5,8 @@ import com.example.todos.simpletodoservice.domain.TodoStatus;
 import com.example.todos.simpletodoservice.exception.NotFoundException;
 import com.example.todos.simpletodoservice.exception.PastDueModificationException;
 import com.example.todos.simpletodoservice.repository.TodoItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +19,7 @@ import static com.example.todos.simpletodoservice.constants.ErrorMessages.*;
 @Service
 public class TodoService {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
     private final TodoItemRepository repository;
 
     public TodoService(TodoItemRepository repository) {
@@ -34,6 +36,7 @@ public class TodoService {
             throw new IllegalArgumentException(DUE_AT_MUST_NOT_BE_NULL);
         }
 
+        logger.info("Creating todo item with dueAt={}", dueAt);
         TodoItem item = new TodoItem(description, dueAt);
         return repository.save(item);
     }
@@ -44,7 +47,7 @@ public class TodoService {
         if(newDescription == null || newDescription.isBlank()){
             throw new IllegalArgumentException(DESCRIPTION_MUST_NOT_BE_BLANK);
         }
-
+        logger.info("Updating description for todo item {}", id);
         TodoItem item = getRefreshedStatus(id);
         ensureNotPastDue(item);
         item.setDescription(newDescription);
@@ -53,6 +56,7 @@ public class TodoService {
 
     @Transactional
     public TodoItem markDone(UUID id) {
+        logger.info("Marking todo item {} as done", id);
         TodoItem item = getRefreshedStatus(id);
         ensureNotPastDue(item);
         item.setStatus(TodoStatus.DONE);
@@ -62,6 +66,7 @@ public class TodoService {
 
     @Transactional
     public TodoItem markNotDone(UUID id) {
+        logger.info("Marking todo item {} as not done", id);
         TodoItem item = getRefreshedStatus(id);
         ensureNotPastDue(item);
         item.setStatus(TodoStatus.NOT_DONE);
@@ -71,6 +76,7 @@ public class TodoService {
 
     @Transactional
     public TodoItem getById(UUID id) {
+        logger.info("Fetching todo item {}", id);
         TodoItem item = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TODO_ITEM_NOT_FOUND + id));
 
@@ -80,6 +86,7 @@ public class TodoService {
 
     @Transactional
     public List<TodoItem> getItems(boolean includeDone) {
+        logger.info("Listing todo items includeDone={}", includeDone);
         refreshPastDue();
         return includeDone
                 ? repository.findAll()
@@ -89,6 +96,7 @@ public class TodoService {
 
     @Transactional
     private void refreshPastDue() {
+        logger.info("updating todo items as PAST_DUE which are past the past due date");
         repository.markPastDue(
                 TodoStatus.PAST_DUE,
                 TodoStatus.DONE,
@@ -105,7 +113,7 @@ public class TodoService {
 
     private TodoItem refreshStatusIfNeeded(TodoItem item){
         if(item.getStatus() != TodoStatus.DONE
-        && item.getDueAt().isBefore(Instant.now())){
+                && item.getDueAt().isBefore(Instant.now())){
             item.setStatus(TodoStatus.PAST_DUE);
         }
         return item;
