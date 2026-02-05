@@ -8,6 +8,7 @@ import com.example.todos.simpletodoservice.mapper.TodoMapper;
 import com.example.todos.simpletodoservice.service.TodoService;import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class TodoController {
 
     @PostMapping
     @Operation(summary = "Create a todo item")
+    @ResponseStatus(HttpStatus.CREATED)
     public TodoResponse item(@Valid @RequestBody CreateTodoRequest request){
         TodoItem created = todoService.create(request.description(), request.dueAt());
         return TodoMapper.toResponse(created);
@@ -37,7 +39,6 @@ public class TodoController {
     @Operation(summary = "Update todo description")
     public TodoResponse updateDescription(@PathVariable UUID id, @Valid @RequestBody UpdateDescriptionRequest request){
         TodoItem updated = todoService.updateDescription(id, request.description());
-
         return TodoMapper.toResponse(updated);
     }
 
@@ -46,7 +47,6 @@ public class TodoController {
     @Operation(summary = "Mark todo as done")
     public TodoResponse markDone(@PathVariable UUID id){
         TodoItem updated = todoService.markDone(id);
-
         return TodoMapper.toResponse(updated);
     }
 
@@ -55,7 +55,6 @@ public class TodoController {
     @Operation(summary = "Mark todo as not done")
     public TodoResponse markNotDone(@PathVariable UUID id){
         TodoItem updated = todoService.markNotDone(id);
-
         return TodoMapper.toResponse(updated);
     }
 
@@ -70,7 +69,6 @@ public class TodoController {
     @Operation(summary = "Get a todo item by id")
     public TodoResponse item(@PathVariable UUID id){
         TodoItem item =  todoService.getById(id);
-
         return TodoMapper.toResponse(item);
     }
 }

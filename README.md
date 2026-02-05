@@ -2,7 +2,36 @@
 
 A simple backend service for managing to-do list operations.
 
-The service supports basic CRUD operations such as creating, updating, and retrieving to-do items.
+---
+## Service Overview
+
+This service provides a REST API to manage to-do items with clear rules around due dates and state transitions.
+
+### Supported Operations
+
+- **Add a to-do item**
+- **Update a to-do item’s description**
+    - Description updates are **not allowed** if the item is already past its due date
+    - Updates are currently allowed for items in DONE status (this can be adjusted based on requirements)
+- **Mark a to-do item as _done_ or _not done_**
+    - Status changes are **not allowed** for past-due items
+- **Retrieve all to-do items**
+    - By default, only items that are **not done** are returned, including those with NOT_DONE and PAST_DUE statuses
+    - Optional support to retrieve **all items**, regardless of status
+- **Retrieve details of a specific to-do item** by ID
+
+---
+
+## Handling of Past-Due Items
+
+The service currently handles past-due items in a simplified way:
+
+- During the **get-all-items** operation, the service performs a bulk check to detect and update any items that have become past due.
+- During **individual get or update operations**, the specific item is also checked and updated PAST_DUE status if it has crossed its due date.
+- Once an item is marked as past due, further modifications (such as updating the description or changing the done/not-done status) are disallowed.
+
+This approach was chosen to keep the initial implementation simple and easy to reason about.  
+Alternative approaches—such as scheduled background jobs or database-level constraints as future improvements.
 
 ---
 

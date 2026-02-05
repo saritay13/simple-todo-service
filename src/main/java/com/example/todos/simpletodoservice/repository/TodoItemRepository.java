@@ -28,5 +28,6 @@ public interface TodoItemRepository extends JpaRepository<TodoItem, UUID> {
             @Param("now") Instant now
     );
 
-
+    @Query("select t from TodoItem t where t.status in (:statuses)")
+    List<TodoItem> findOpenItems(@Param("statuses") List<TodoStatus> statuses);
 }

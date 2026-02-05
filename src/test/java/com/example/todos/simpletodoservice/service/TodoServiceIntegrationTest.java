@@ -14,8 +14,10 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class TodoServiceTest {
+public class TodoServiceIntegrationTest {
 
+    public static final String DESCRIPTION_DO_ASSIGNMENT = "Do assignment";
+    public static final String NEW_DESCRIPTION = "new Description";
     @Autowired
     private TodoService todoService;
 
@@ -31,7 +33,7 @@ public class TodoServiceTest {
     void getById_shouldMarkItemAsPastDue_whenDueDateIsInPast(){
         //arrange
         Instant past = Instant.now().minusSeconds(60);
-        TodoItem created = todoService.create("pay bills", past);
+        TodoItem created = todoService.create(DESCRIPTION_DO_ASSIGNMENT, past);
 
         //act
         TodoItem loaded = todoService.getById(created.getId());
@@ -44,18 +46,18 @@ public class TodoServiceTest {
     void updateDescription_shouldThrow_whenItemIsPastDue() {
         // arrange
         Instant past = Instant.now().minusSeconds(60);
-        TodoItem created = todoService.create("old task", past);
+        TodoItem created = todoService.create(DESCRIPTION_DO_ASSIGNMENT, past);
 
         //act and assert
         assertThrows(PastDueModificationException.class,
-                ()-> todoService.updateDescription(created.getId(), "new Description"));
+                ()-> todoService.updateDescription(created.getId(), NEW_DESCRIPTION));
     }
 
     @Test
     void markDone_shouldSetDoneStatusAndDoneAt() {
         // arrange
         Instant future = Instant.now().plusSeconds(3600);
-        TodoItem created = todoService.create("finish assignment", future);
+        TodoItem created = todoService.create(DESCRIPTION_DO_ASSIGNMENT, future);
 
         // act
         TodoItem done = todoService.markDone(created.getId());

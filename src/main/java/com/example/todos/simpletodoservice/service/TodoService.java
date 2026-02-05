@@ -87,14 +87,14 @@ public class TodoService {
     @Transactional
     public List<TodoItem> getItems(boolean includeDone) {
         logger.info("Listing todo items includeDone={}", includeDone);
+
+        /*For simplicity, we perform a bulk refresh of past-due items at read time (trade-off: reads may trigger writes)*/
         refreshPastDue();
         return includeDone
                 ? repository.findAll()
-                : repository.findAllByStatus(TodoStatus.NOT_DONE);
+                : repository.findOpenItems(List.of(TodoStatus.NOT_DONE, TodoStatus.PAST_DUE));
     }
 
-
-    @Transactional
     private void refreshPastDue() {
         logger.info("updating todo items as PAST_DUE which are past the past due date");
         repository.markPastDue(
