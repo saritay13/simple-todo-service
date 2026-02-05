@@ -79,6 +79,9 @@ Swagger groups endpoints into the following tags:
 Clone the repository:
 ```bash
 git clone https://github.com/saritay13/simple-todo-service.git
+```
+Move to the project directory:
+```bash
 cd simple-todo-service
 ```
 
@@ -96,7 +99,6 @@ docker run --rm -p 8080:8080 simple-todo-service
 After the container starts, open Swagger UI in your browser:
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ---
 ---
